@@ -8,7 +8,8 @@ import {
   BookOpen, 
   Users,
   Package,
-  TrendingUp
+  TrendingUp,
+  ShoppingCart 
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -64,6 +65,12 @@ const Sidebar = () => {
       icon: Package,
       show: hasPermission('canManageProducts')
     },
+    {
+  name: 'Orders',
+  path: '/orders',
+  icon: ShoppingCart,
+  show: true
+},
     {
       name: 'Reports',
       path: '/reports',

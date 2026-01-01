@@ -12,6 +12,9 @@ import CreatePayment from './components/payments/CreatePayment';
 import LedgerView from './components/ledger/LedgerView';
 import CustomerList from './components/ledger/CustomerList';
 import ProductList from './components/products/ProductList';
+import OrderList from './components/orders/OrderList';
+import CreateOrder from './components/orders/CreateOrder';
+import OrderDetail from './components/orders/OrderDetail';
 
 function App() {
   return (
@@ -19,60 +22,78 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          
+
           <Route path="/" element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/bills" element={
             <ProtectedRoute>
               <BillList />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/bills/create" element={
             <ProtectedRoute permission="canCreateBills">
               <CreateBill />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/bills/:id" element={
             <ProtectedRoute>
               <BillDetail />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/payments" element={
             <ProtectedRoute>
               <PaymentList />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/payments/create" element={
             <ProtectedRoute permission="canRecordPayments">
               <CreatePayment />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/ledger/:userId" element={
             <ProtectedRoute>
               <LedgerView />
             </ProtectedRoute>
           } />
           <Route path="/products" element={
-  <ProtectedRoute>
-    <ProductList />
-  </ProtectedRoute>
-} />
-          
+            <ProtectedRoute>
+              <ProductList />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/orders/create" element={
+            <ProtectedRoute>
+              <CreateOrder />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/orders/:id" element={
+            <ProtectedRoute>
+              <OrderDetail />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/orders" element={
+            <ProtectedRoute>
+              <OrderList />
+            </ProtectedRoute>
+          } />
+
           <Route path="/customers" element={
             <ProtectedRoute permission="canViewAllLedgers">
               <CustomerList />
             </ProtectedRoute>
           } />
-          
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

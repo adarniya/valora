@@ -13,7 +13,8 @@ const billRoutes = require('./routes/bills');
 const paymentRoutes = require('./routes/payments');
 const ledgerRoutes = require('./routes/ledger');
 const reportRoutes = require('./routes/reports');
-const productRoutes = require('./routes/products');
+const productRoutes = require('./routes/products'); 
+const orderRoutes = require('./routes/orders');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/bills', billRoutes);
@@ -21,6 +22,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/ledger', ledgerRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({
