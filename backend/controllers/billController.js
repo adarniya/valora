@@ -80,15 +80,22 @@ exports.createBill = async (req, res) => {
     const user_name = userRows[0].name;
     
     const [ledgerRows] = await connection.query(
-      `SELECT balance_after FROM ledger 
-       WHERE user_id = ? 
-       ORDER BY created_at DESC, id DESC 
-       LIMIT 1`,
-      [user_id]
-    );
-    
-    const previous_balance = ledgerRows.length > 0 ? ledgerRows[0].balance_after : 0;
-    const new_balance = previous_balance + total_amount;
+  `SELECT balance_after 
+   FROM ledger
+   WHERE business_id = ?
+   AND store_id = ?
+   AND user_id = ?
+   ORDER BY created_at DESC, id DESC
+   LIMIT 1
+   FOR UPDATE`,
+  [business_id, store_id, user_id]
+);
+
+const previous_balance =
+  ledgerRows.length > 0 ? Number(ledgerRows[0].balance_after) : 0;
+
+const new_balance = previous_balance + Number(total_amount);
+
     
     await connection.query(
       `INSERT INTO ledger (
@@ -273,6 +280,7 @@ exports.getCustomers = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 // Get stores for dropdown
 exports.getStores = async (req, res) => {
   try {

@@ -32,12 +32,13 @@ const generateOrderNumber = async (connection, business_id, store_id) => {
 };
 
 // Create Order
+// Create Order
 exports.createOrder = async (req, res) => {
   const connection = await pool.getConnection();
-  
+
   try {
     await connection.beginTransaction();
-    
+
     const {
       user_id,
       store_id,
@@ -46,29 +47,40 @@ exports.createOrder = async (req, res) => {
       items,
       remarks
     } = req.body;
-    
+
     const business_id = req.user.business_id;
     const created_by = req.user.id;
-    
+
     if (!user_id || !store_id || !order_date || !items || items.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'Missing required fields'
       });
     }
-    
+
+    // --- NEW PERMISSION CHECK ---
+    const targetUserId = parseInt(user_id);
+    const canCreateForOthers = hasPermission(req.user.role_id, 'canCreateOrderForOthers');
+
+    if (!canCreateForOthers && targetUserId !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only create orders for yourself.'
+      });
+    }
+
     let sub_total = 0;
     let total_quantity = 0;
     let total_items = 0;
-    
+
     const orderItems = items.map(item => {
       const line_total = item.quantity * item.rate;
       const base_unit_qty = item.quantity * item.unit_value;
-      
+
       sub_total += line_total;
       total_quantity += base_unit_qty;
       total_items += item.quantity;
-      
+
       return {
         product_id: item.product_id,
         quantity: item.quantity,
@@ -77,10 +89,10 @@ exports.createOrder = async (req, res) => {
         line_total
       };
     });
-    
+
     const total_amount = sub_total;
     const order_number = await generateOrderNumber(connection, business_id, store_id);
-    
+
     const [orderResult] = await connection.query(
       `INSERT INTO orders (
         business_id, store_id, user_id, order_number, order_date,
@@ -91,9 +103,9 @@ exports.createOrder = async (req, res) => {
        expected_delivery_date, sub_total, total_amount, total_quantity, 
        total_items, created_by, remarks]
     );
-    
+
     const order_id = orderResult.insertId;
-    
+
     for (const item of orderItems) {
       await connection.query(
         `INSERT INTO order_items (
@@ -102,9 +114,9 @@ exports.createOrder = async (req, res) => {
         [order_id, item.product_id, item.quantity, item.base_unit_qty, item.rate, item.line_total]
       );
     }
-    
+
     await connection.commit();
-    
+
     res.status(201).json({
       success: true,
       message: 'Order created successfully',
@@ -114,7 +126,7 @@ exports.createOrder = async (req, res) => {
         total_amount
       }
     });
-    
+
   } catch (error) {
     await connection.rollback();
     console.error('Error creating order:', error);
@@ -127,6 +139,7 @@ exports.createOrder = async (req, res) => {
     connection.release();
   }
 };
+
 
 // Get Orders
 exports.getOrders = async (req, res) => {

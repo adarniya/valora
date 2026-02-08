@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const path = require('path');
 
 const app = express();
 
@@ -13,7 +14,7 @@ const billRoutes = require('./routes/bills');
 const paymentRoutes = require('./routes/payments');
 const ledgerRoutes = require('./routes/ledger');
 const reportRoutes = require('./routes/reports');
-const productRoutes = require('./routes/products'); 
+const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 
 app.use('/api/auth', authRoutes);
@@ -32,10 +33,20 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Serve React frontend
+app.use(express.static(path.join(__dirname, '../build')));
+
+// React fallback (FIXED)
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../build', 'index.html'));
+});
+
+// 404 handler (after React)
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
+// Error handler
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   res.status(500).json({
@@ -48,5 +59,4 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Valora ERP Server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });

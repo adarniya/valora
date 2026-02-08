@@ -10,13 +10,15 @@ const CreateOrder = () => {
   const { user, hasPermission } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [customers, setCustomers] = useState([]);
   const [stores, setStores] = useState([]);
   const [products, setProducts] = useState([]);
-  
+
+  const canCreateForOthers = hasPermission('canCreateOrderForOthers');
+
   const [formData, setFormData] = useState({
-    user_id: hasPermission('canCreateBills') ? '' : user?.id,
+    user_id: user?.id, // default to current user
     store_id: '',
     order_date: new Date().toISOString().split('T')[0],
     expected_delivery_date: '',
@@ -40,7 +42,6 @@ const CreateOrder = () => {
         billService.getCustomers(),
         billService.getStores()
       ]);
-      
       if (customersRes.success) setCustomers(customersRes.data);
       if (storesRes.success) setStores(storesRes.data);
     } catch (err) {
@@ -51,9 +52,7 @@ const CreateOrder = () => {
   const fetchProductsWithPricing = async () => {
     try {
       const response = await orderService.getProductsWithPricing(formData.user_id);
-      if (response.success) {
-        setProducts(response.data);
-      }
+      if (response.success) setProducts(response.data);
     } catch (err) {
       console.error('Error fetching products:', err);
     }
@@ -74,7 +73,7 @@ const CreateOrder = () => {
   const updateItem = (index, field, value) => {
     const newItems = [...formData.items];
     newItems[index][field] = value;
-    
+
     if (field === 'product_id') {
       const product = products.find(p => p.id === parseInt(value));
       if (product) {
@@ -82,19 +81,18 @@ const CreateOrder = () => {
         newItems[index].unit_value = product.unit_value;
       }
     }
-    
+
     setFormData({ ...formData, items: newItems });
   };
 
   const calculateTotal = () => {
-    return formData.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+    return formData.items.reduce((sum, item) => sum + item.quantity * item.rate, 0);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       const response = await orderService.createOrder(formData);
       if (response.success) {
@@ -126,26 +124,27 @@ const CreateOrder = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {hasPermission('canCreateBills') && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Customer * <span className="text-xs text-gray-500">(Search by typing)</span>
-                </label>
-                <select
-                  value={formData.user_id}
-                  onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Select Customer</option>
-                  {customers.map(customer => (
-                    <option key={customer.id} value={customer.id}>
-                      {customer.name} - {customer.contact} ({customer.username})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {/* Customer dropdown always visible */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Customer * <span className="text-xs text-gray-500">(Search by typing)</span>
+              </label>
+              <select
+                value={formData.user_id}
+                onChange={(e) => canCreateForOthers && setFormData({ ...formData, user_id: e.target.value })}
+                disabled={!canCreateForOthers} // editable only if allowed
+                className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  !canCreateForOthers ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
+                required
+              >
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} - {c.contact} ({c.username})
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Store *</label>
@@ -157,9 +156,7 @@ const CreateOrder = () => {
               >
                 <option value="">Select Store</option>
                 {stores.map(store => (
-                  <option key={store.id} value={store.id}>
-                    {store.name}
-                  </option>
+                  <option key={store.id} value={store.id}>{store.name}</option>
                 ))}
               </select>
             </div>

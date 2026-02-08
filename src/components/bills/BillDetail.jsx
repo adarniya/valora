@@ -32,6 +32,7 @@ const BillDetail = () => {
 
   const handlePrint = () => {
     window.print();
+    
   };
 
   if (loading) return <div className="text-center py-8">Loading bill details...</div>;

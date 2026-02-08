@@ -4,7 +4,7 @@ const orderController = require('../controllers/orderController');
 const authenticateToken = require('../middleware/auth');
 const { requirePermission } = require('../middleware/roleCheck');
 
-// Create order - Both users and sales can create
+// Create order - Both users and allowed roles can create for others
 router.post('/', authenticateToken, orderController.createOrder);
 
 // Get orders - Everyone can view their own
