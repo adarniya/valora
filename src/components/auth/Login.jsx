@@ -13,7 +13,7 @@ const Login = () => {
 
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
 
@@ -26,7 +26,7 @@ const Login = () => {
       const response = await login(username, password);
       
       if (response.success) {
-        navigate('/');
+        navigate('/dashboard');
       } else {
         setError(response.message || 'Login failed');
       }

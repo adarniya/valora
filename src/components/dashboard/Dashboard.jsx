@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { FileText, CreditCard, Users, TrendingUp } from 'lucide-react';
+import { FileText, CreditCard, Clock } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, hasPermission } = useAuth();
@@ -62,6 +62,19 @@ const Dashboard = () => {
             <div>
               <p className="text-sm text-gray-600">View</p>
               <p className="text-lg font-semibold text-gray-800">All Payments</p>
+            </div>
+          </div>
+        </Link>
+
+        {/* Aging Report — visible to all roles */}
+        <Link to="/aging" className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="bg-amber-100 p-3 rounded-lg">
+              <Clock className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">View</p>
+              <p className="text-lg font-semibold text-gray-800">Aging Report</p>
             </div>
           </div>
         </Link>

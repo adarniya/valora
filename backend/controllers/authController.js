@@ -53,7 +53,7 @@ exports.login = async (req, res) => {
         store_id: user.store_id
       },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '12h' }
     );
 
     // Get user permissions

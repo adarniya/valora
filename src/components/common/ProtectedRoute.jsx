@@ -1,11 +1,34 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
 const ProtectedRoute = ({ children, permission }) => {
-  const { isAuthenticated, hasPermission } = useAuth();
+  const { isAuthenticated, hasPermission, logout } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check token expire on mount
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expiry = payload.exp * 1000;
+        
+        if (Date.now() >= expiry) {
+          // Token dead - logout
+          logout(); // This should clear localStorage and set isAuthenticated = false
+          navigate('/login');
+        }
+      } catch (e) {
+        // Bad token - logout
+        logout();
+        navigate('/login');
+      }
+    }
+  }, [logout, navigate]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

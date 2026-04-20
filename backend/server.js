@@ -9,21 +9,23 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const authRoutes = require('./routes/auth');
-const billRoutes = require('./routes/bills');
+const authRoutes    = require('./routes/auth');
+const billRoutes    = require('./routes/bills');
 const paymentRoutes = require('./routes/payments');
-const ledgerRoutes = require('./routes/ledger');
-const reportRoutes = require('./routes/reports');
+const ledgerRoutes  = require('./routes/ledger');
+const reportRoutes  = require('./routes/reports');
 const productRoutes = require('./routes/products');
-const orderRoutes = require('./routes/orders');
+const orderRoutes   = require('./routes/orders');
+const agingRoutes   = require('./routes/aging');         // ← ADDED
 
-app.use('/api/auth', authRoutes);
-app.use('/api/bills', billRoutes);
+app.use('/api/auth',     authRoutes);
+app.use('/api/bills',    billRoutes);
 app.use('/api/payments', paymentRoutes);
-app.use('/api/ledger', ledgerRoutes);
-app.use('/api/reports', reportRoutes);
+app.use('/api/ledger',   ledgerRoutes);
+app.use('/api/reports',  reportRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
+app.use('/api/orders',   orderRoutes);
+app.use('/api/aging',    agingRoutes);                  // ← ADDED
 
 app.get('/api/health', (req, res) => {
   res.json({
@@ -36,12 +38,12 @@ app.get('/api/health', (req, res) => {
 // Serve React frontend
 app.use(express.static(path.join(__dirname, '../build')));
 
-// React fallback (FIXED)
+// React fallback
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 
-// 404 handler (after React)
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });

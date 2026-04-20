@@ -9,7 +9,8 @@ import {
   Users,
   Package,
   TrendingUp,
-  ShoppingCart 
+  ShoppingCart,
+  Clock
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -66,11 +67,17 @@ const Sidebar = () => {
       show: hasPermission('canManageProducts')
     },
     {
-  name: 'Orders',
-  path: '/orders',
-  icon: ShoppingCart,
-  show: true
-},
+      name: 'Orders',
+      path: '/orders',
+      icon: ShoppingCart,
+      show: true
+    },
+    {
+      name: 'Aging Report',
+      path: '/aging',
+      icon: Clock,
+      show: true
+    },
     {
       name: 'Reports',
       path: '/reports',

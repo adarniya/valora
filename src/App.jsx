@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import Login from './components/auth/Login';
 import Dashboard from './components/dashboard/Dashboard';
+import Landingpage from './components/landing/Landingpage';
 import BillList from './components/bills/BillList';
 import CreateBill from './components/bills/CreateBill';
 import BillDetail from './components/bills/BillDetail';
@@ -15,15 +16,21 @@ import ProductList from './components/products/ProductList';
 import OrderList from './components/orders/OrderList';
 import CreateOrder from './components/orders/CreateOrder';
 import OrderDetail from './components/orders/OrderDetail';
+import AgingReport from './components/aging/AgingReport';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/" element={
+            
+              <Landingpage />
+           
+          } />
           <Route path="/login" element={<Login />} />
 
-          <Route path="/" element={
+          <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
@@ -52,6 +59,14 @@ function App() {
               <PaymentList />
             </ProtectedRoute>
           } />
+
+          <Route path="/aging" element={
+            <ProtectedRoute>
+              <AgingReport />
+            </ProtectedRoute>
+          } />
+
+
 
           <Route path="/payments/create" element={
             <ProtectedRoute permission="canRecordPayments">
