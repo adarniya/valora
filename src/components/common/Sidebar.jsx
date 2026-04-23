@@ -1,119 +1,169 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  CreditCard, 
-  BookOpen, 
-  Users,
-  Package,
-  TrendingUp,
-  ShoppingCart,
-  Clock
+import {
+  LayoutDashboard, FileText, CreditCard, BookOpen,
+  Users, Package, ShoppingCart, Clock, Shield,
+  ChevronDown, ChevronRight, TrendingUp
 } from 'lucide-react';
 
 const Sidebar = () => {
   const { user, hasPermission } = useAuth();
   const location = useLocation();
+  const [open, setOpen] = useState({});
 
-  const menuItems = [
+  const toggle = (key) => setOpen(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
+
+  const groups = [
     {
+      key: 'dashboard',
       name: 'Dashboard',
-      path: '/',
       icon: LayoutDashboard,
-      show: true
+      path: '/dashboard',
+      show: true,
+      single: true
     },
     {
+      key: 'bills',
       name: 'Bills',
-      path: '/bills',
       icon: FileText,
-      show: true
+      show: hasPermission('view_all_bills') || hasPermission('view_own_bills') || hasPermission('create_bills'),
+      children: [
+        { name: 'View All Bills', path: '/bills', show: hasPermission('view_all_bills') },
+        { name: 'My Bills', path: `/bills?own=true`, show: hasPermission('view_own_bills') && !hasPermission('view_all_bills') },
+        { name: 'Create Bill', path: '/bills/create', show: hasPermission('create_bills') },
+      ]
     },
     {
-      name: 'Create Bill',
-      path: '/bills/create',
-      icon: FileText,
-      show: hasPermission('canCreateBills')
-    },
-    {
+      key: 'payments',
       name: 'Payments',
-      path: '/payments',
       icon: CreditCard,
-      show: true
+      show: hasPermission('view_all_payments') || hasPermission('view_own_payment') || hasPermission('create_payment'),
+      children: [
+        { name: 'All Payments', path: '/payments', show: hasPermission('view_all_payments') },
+        { name: 'My Payments', path: '/payments?own=true', show: hasPermission('view_own_payment') && !hasPermission('view_all_payments') },
+        { name: 'Record Payment', path: '/payments/create', show: hasPermission('create_payment') },
+      ]
     },
     {
-      name: 'Record Payment',
-      path: '/payments/create',
-      icon: CreditCard,
-      show: hasPermission('canRecordPayments')
-    },
-    {
-      name: 'My Ledger',
-      path: `/ledger/${user?.id}`,
+      key: 'ledger',
+      name: 'Ledger',
       icon: BookOpen,
-      show: !hasPermission('canViewAllLedgers')
+      show: hasPermission('view_all_ledger') || hasPermission('view_own_ledger') || hasPermission('view_all_customers'),
+      children: [
+        { name: 'All Customers', path: '/customers', show: hasPermission('view_all_customers') },
+      { name: 'My Ledger', path: `/ledger/${user?.id}`, show: hasPermission('view_own_ledger') && !hasPermission('view_all_ledger') },
+      ]
     },
     {
-      name: 'All Customers',
-      path: '/customers',
-      icon: Users,
-      show: hasPermission('canViewAllLedgers')
-    },
-    {
-      name: 'Products',
-      path: '/products',
-      icon: Package,
-      show: hasPermission('canManageProducts')
-    },
-    {
+      key: 'orders',
       name: 'Orders',
-      path: '/orders',
       icon: ShoppingCart,
-      show: true
+      show: hasPermission('view_all_orders') || hasPermission('view_own_orders') || hasPermission('create_all_orders') || hasPermission('create_own_orders'),
+      children: [
+        { name: 'All Orders', path: '/orders', show: hasPermission('view_all_orders') },
+        { name: 'My Orders', path: '/orders?own=true', show: hasPermission('view_own_orders') && !hasPermission('view_all_orders') },
+        { name: 'Create Order', path: '/orders/create', show: hasPermission('create_all_orders') || hasPermission('create_own_orders') },
+      ],
     },
     {
+      key: 'products',
+      name: 'Products',
+      icon: Package,
+      show: hasPermission('view_products'),
+      single: true,
+      path: '/products'
+    },
+    {
+      key: 'aging',
       name: 'Aging Report',
-      path: '/aging',
       icon: Clock,
-      show: true
+      show: hasPermission('view_all_aging') || hasPermission('view_own_aging'),
+      children: [
+        { name: 'All Aging', path: '/aging', show: hasPermission('view_all_aging') },
+        { name: 'My Aging', path: '/aging?own=true', show: hasPermission('view_own_aging') && !hasPermission('view_all_aging') },
+      ]
     },
     {
+      key: 'reports',
       name: 'Reports',
-      path: '/reports',
       icon: TrendingUp,
-      show: hasPermission('canViewReports')
+      show: hasPermission('view_all_aging'),
+      single: true,
+      path: '/reports'
+    },
+    {
+      key: 'permissions',
+      name: 'Permissions',
+      icon: Shield,
+      show: user?.role_id === 1,
+      single: true,
+      path: '/permissions'
     }
   ];
-
-  const isActive = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
-  };
 
   return (
     <aside className="w-64 bg-white shadow-lg min-h-screen">
       <nav className="p-4">
-        <ul className="space-y-2">
-          {menuItems.filter(item => item.show).map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            
+        <ul className="space-y-1">
+          {groups.filter(g => g.show).map((group) => {
+            const Icon = group.icon;
+
+            if (group.single) {
+              const active = isActive(group.path);
+              return (
+                <li key={group.key}>
+                  <Link
+                    to={group.path}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      active ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span>{group.name}</span>
+                  </Link>
+                </li>
+              );
+            }
+
+            const isGroupActive = group.children?.some(c => c.show && location.pathname === c.path);
+            const isOpen = open[group.key] || isGroupActive;
+            const visibleChildren = group.children?.filter(c => c.show) || [];
+
             return (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    active
-                      ? 'bg-blue-50 text-blue-600 font-semibold'
-                      : 'text-gray-700 hover:bg-gray-100'
+              <li key={group.key}>
+                <button
+                  onClick={() => toggle(group.key)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    isGroupActive ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </Link>
+                  <span className="flex-1 text-left">{group.name}</span>
+                  {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                </button>
+
+                {isOpen && (
+                  <ul className="ml-9 mt-1 space-y-1">
+                    {visibleChildren.map(child => {
+                      const active = location.pathname === child.path.split('?')[0];
+                      return (
+                        <li key={child.path}>
+                          <Link
+                            to={child.path}
+                            className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
+                              active ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            {child.name}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </li>
             );
           })}

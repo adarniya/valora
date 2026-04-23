@@ -17,17 +17,14 @@ import OrderList from './components/orders/OrderList';
 import CreateOrder from './components/orders/CreateOrder';
 import OrderDetail from './components/orders/OrderDetail';
 import AgingReport from './components/aging/AgingReport';
+import PermissionManager from './components/permissions/PermissionManager';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={
-            
-              <Landingpage />
-           
-          } />
+          <Route path="/" element={<Landingpage />} />
           <Route path="/login" element={<Login />} />
 
           <Route path="/dashboard" element={
@@ -36,14 +33,16 @@ function App() {
             </ProtectedRoute>
           } />
 
+
           <Route path="/bills" element={
             <ProtectedRoute>
               <BillList />
             </ProtectedRoute>
           } />
 
+
           <Route path="/bills/create" element={
-            <ProtectedRoute permission="canCreateBills">
+            <ProtectedRoute permission="create_bills">
               <CreateBill />
             </ProtectedRoute>
           } />
@@ -55,21 +54,13 @@ function App() {
           } />
 
           <Route path="/payments" element={
-            <ProtectedRoute>
+            <ProtectedRoute >
               <PaymentList />
             </ProtectedRoute>
           } />
 
-          <Route path="/aging" element={
-            <ProtectedRoute>
-              <AgingReport />
-            </ProtectedRoute>
-          } />
-
-
-
           <Route path="/payments/create" element={
-            <ProtectedRoute permission="canRecordPayments">
+            <ProtectedRoute permission="create_payment">
               <CreatePayment />
             </ProtectedRoute>
           } />
@@ -79,14 +70,27 @@ function App() {
               <LedgerView />
             </ProtectedRoute>
           } />
+
+          <Route path="/customers" element={
+            <ProtectedRoute permission="view_all_customers">
+              <CustomerList />
+            </ProtectedRoute>
+          } />
+
           <Route path="/products" element={
-            <ProtectedRoute>
+            <ProtectedRoute permission="view_products">
               <ProductList />
             </ProtectedRoute>
           } />
 
+          <Route path="/orders" element={
+            <ProtectedRoute permission="view_all_orders">
+              <OrderList />
+            </ProtectedRoute>
+          } />
+
           <Route path="/orders/create" element={
-            <ProtectedRoute>
+            <ProtectedRoute permission="create_all_orders">
               <CreateOrder />
             </ProtectedRoute>
           } />
@@ -97,15 +101,15 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/orders" element={
-            <ProtectedRoute>
-              <OrderList />
+          <Route path="/aging" element={
+            <ProtectedRoute permission="view_all_aging">
+              <AgingReport />
             </ProtectedRoute>
           } />
 
-          <Route path="/customers" element={
-            <ProtectedRoute permission="canViewAllLedgers">
-              <CustomerList />
+          <Route path="/permissions" element={
+            <ProtectedRoute>
+              <PermissionManager />
             </ProtectedRoute>
           } />
 

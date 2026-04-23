@@ -4,7 +4,7 @@ import { ledgerService } from '../../services/ledgerService';
 import { formatCurrency, formatDateTime } from '../../utils/formatters';
 import { ArrowLeft, Printer } from 'lucide-react';
 
-const LedgerView = () => {
+const LedgerView = () => {  
   const { userId } = useParams();
   const navigate = useNavigate();
 

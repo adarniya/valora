@@ -8,32 +8,26 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check token on app load
     const token = localStorage.getItem('token');
-    
+
     if (token) {
       try {
-        // Decode and check expiry
         const payload = JSON.parse(atob(token.split('.')[1]));
         const expiry = payload.exp * 1000;
-        
         if (Date.now() >= expiry) {
-          // Token expired - clear everything
           authService.logout();
           setUser(null);
           setLoading(false);
           return;
         }
       } catch (e) {
-        // Bad token - clear everything
         authService.logout();
         setUser(null);
         setLoading(false);
         return;
       }
     }
-    
-    // Token valid or no token - proceed normal
+
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
     setLoading(false);
@@ -52,8 +46,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // permissions is now an array: ['create_bills', 'view_all_payments', ...]
   const hasPermission = (permission) => {
-    return user?.permissions?.[permission] === true;
+    if (!user?.permissions) return false;
+    return user.permissions.includes(permission);
   };
 
   const value = {
@@ -74,8 +70,6 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };

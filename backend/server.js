@@ -17,7 +17,8 @@ const reportRoutes  = require('./routes/reports');
 const productRoutes = require('./routes/products');
 const orderRoutes   = require('./routes/orders');
 const agingRoutes   = require('./routes/aging');         // ← ADDED
-
+const permissionRoutes = require('./routes/permissions');
+app.use('/api/permissions', permissionRoutes);
 app.use('/api/auth',     authRoutes);
 app.use('/api/bills',    billRoutes);
 app.use('/api/payments', paymentRoutes);
